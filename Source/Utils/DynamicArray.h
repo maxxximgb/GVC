@@ -4,10 +4,9 @@
 #include <cstddef>
 #include <cstring>
 #include <memory>
+#include <new>
 #include <type_traits>
 
-#include <MemoryAllocation/MemoryAllocator.h>
-#include <MemoryAllocation/MemoryDeleter.h>
 #include <MemoryAllocation/UniquePtr.h>
 
 template <typename T>
@@ -136,9 +135,9 @@ private:
 
     [[nodiscard]] T* createNewMemory(std::size_t newCapacity) const noexcept
     {
-        if (const auto newMemory = MemoryAllocator<T[]>::allocate(newCapacity)) {
-            copyMemoryTo(newMemory);
-            return reinterpret_cast<T*>(newMemory);
+        if (const auto newMemory = reinterpret_cast<T*>(::operator new[](newCapacity * sizeof(T), std::nothrow))) {
+            copyMemoryTo(reinterpret_cast<std::byte*>(newMemory));
+            return newMemory;
         }
         return nullptr;
     }

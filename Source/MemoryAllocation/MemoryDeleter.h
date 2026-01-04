@@ -3,16 +3,11 @@
 #include <cstddef>
 #include <memory>
 
-#include "MemoryAllocator.h"
-
 template <typename T>
 struct MemoryDeleter {
     void operator()(T* memory) const noexcept
     {
-        if (memory) {
-            std::destroy_at(memory);
-            MemoryAllocator<T>::deallocate(memory);
-        }
+        delete memory;
     }
 };
 
@@ -27,10 +22,7 @@ struct MemoryDeleter<T[]> {
 
     void operator()(T* memory) const noexcept
     {
-        if (memory) {
-            std::destroy_n(memory, numberOfElements);
-            MemoryAllocator<T[]>::deallocate(memory, numberOfElements);
-        }
+        delete[] memory;
     }
 
     [[nodiscard]] std::size_t getNumberOfElements() const noexcept

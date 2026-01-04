@@ -15,11 +15,6 @@ constinit ManuallyDestructible<GlobalContext> GlobalContext::globalContext;
 
 #include <Windows.h>
 
-void operator delete(void*, std::size_t) noexcept
-{
-    // for 'placement new' to work
-}
-
 extern "C" std::size_t DllMain(HMODULE, DWORD reason, LPVOID) noexcept
 {
     if (reason == DLL_PROCESS_ATTACH)

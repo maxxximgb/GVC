@@ -1,10 +1,10 @@
 #pragma once
 
 #include <cstring>
+#include <new>
 
 #include <CS2/Classes/CSceneObject.h>
 #include <GameClient/SceneSystem/SceneSystem.h>
-#include <MemoryAllocation/MemoryAllocator.h>
 
 #include "GlowSceneObject.h"
 #include "GlowSceneObjectPointer.h"
@@ -49,10 +49,10 @@ public:
         state().size = 0;
 
         if (state().capacity > 0) {
-            MemoryAllocator<GlowSceneObjectPointer[]>::deallocate(state().glowSceneObjects, state().capacity);
+            delete[] state().glowSceneObjects;
             state().capacity = 0;
         }
-    }
+        }
 
 private:
     [[nodiscard]] auto& state() const noexcept
@@ -95,13 +95,13 @@ private:
             return index;
         } else {
             const auto newCapacity = static_cast<GlowSceneObjectsState::SizeType>(state().capacity + 10);
-            const auto newGlowSceneObjects = reinterpret_cast<GlowSceneObjectPointer*>(MemoryAllocator<GlowSceneObjectPointer[]>::allocate(newCapacity));
+            const auto newGlowSceneObjects = new (std::nothrow) GlowSceneObjectPointer[newCapacity];
             if (newGlowSceneObjects) {
                 if (state().size > 0)
                     std::memcpy(newGlowSceneObjects, state().glowSceneObjects, state().size * sizeof(GlowSceneObjectPointer));
 
                 if (state().capacity > 0)
-                    MemoryAllocator<GlowSceneObjectPointer[]>::deallocate(state().glowSceneObjects, state().capacity);
+                    delete[] state().glowSceneObjects;
 
                 state().capacity = newCapacity;
                 state().glowSceneObjects = newGlowSceneObjects;
